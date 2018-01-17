@@ -1,0 +1,31 @@
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: registry-deployment
+  labels:
+    app: registry
+  namespace: localdeploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: registry
+  template:
+    metadata:
+      labels:
+        app: registry
+    spec:
+      containers:
+        - name: registry
+          image: registry:2
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          volumeMounts:
+            - mountPath: "/var/lib/registry"
+              name: registry-storage 
+      volumes:
+        - name: registry-storage
+          persistentVolumeClaim:
+            claimName: task-pv-claim
