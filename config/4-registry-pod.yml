@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: registry-v1
+  labels:
+    app: registry
+  namespace: localdeploy
+spec:
+  containers:
+  - name: registry
+    image: registry:2
+    imagePullPolicy: Always
+    ports:
+      - containerPort: 5000
+    volumeMounts:
+      - mountPath: "/var/lib/registry"
+        name: registry-storage 
+  volumes:
+    - name: registry-storage
+      persistentVolumeClaim:
+        claimName: task-pv-claim
