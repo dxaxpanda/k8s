@@ -5,7 +5,15 @@ MAINTAINER Jérémy MIRRE - jeremy.mirre@skores.com
 ENV JAPA_OPTS -Djava.util.logging.config.file=/var/jenkins_home/log.properties
 ENV JENKINS_OPTS --httpPort=8080
 # --httpsPort=443 --httpsCertificate=/var/jenkins_home/cert.pem --httpsPrivateKey=/var/jenkins_home/key.pem
+
 ENV JENKINS_SLAVE_AGENT_PORT 50000
+
+USER root
+
+RUN apk update && \
+    apk add --no-cache docker
+
+USER jenkins 
 
 # Copy important configuration files
 COPY custom.groovy /usr/share/jenkins/ref/init.groovy.d/custom.groovy
