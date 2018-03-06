@@ -7,29 +7,39 @@ ENV COMPOSER_HOME $HOME/.composer
 ENV COMPOSER_VERSION 1.6.3
 ENV PHP_INI_DIR /etc/php7
 ENV PATH $HOME/.composer/vendor/bin:$PATH
-# Fix utf-8 convert issue with phpdox
-ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so
+ENV PACKAGE_WINCOMP_USER dev
+ENV Package_WINCOMP_PASSWORD JrUfaHz9g
+
 USER root
+# Install language pack
+RUN apk --no-cache add ca-certificates wget && \
+    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://raw.githubusercontent.com/sgerrand/alpine-pkg-glibc/master/sgerrand.rsa.pub && \
+    wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.25-r0/glibc-2.25-r0.apk && \
+    wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.25-r0/glibc-bin-2.25-r0.apk && \
+    wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.25-r0/glibc-i18n-2.25-r0.apk && \
+    apk add glibc-bin-2.25-r0.apk glibc-i18n-2.25-r0.apk glibc-2.25-r0.apk
+
+# Iterate through all locale and install it
+# Note that locale -a is not available in alpine linux, use `/usr/glibc-compat/bin/locale -a` instead
+COPY ./locale.md /locale.md
+RUN cat /locale.md | xargs -i /usr/glibc-compat/bin/localedef -i {} -f UTF-8 {}.UTF-8
+
 # Set the lang, you can also specify it as as environment variable through docker-compose.yml
 ENV LANG=fr_FR.UTF-8 \ 
     LANGUAGE=fr_FR.UTF-8 \ 
     LC_CTYPE=fr_FR.UTF-8 \ 
     LC_ALL=fr_FR.UTF-8
-
-# add gnu libiconv for utf8 encoding issue
 RUN apk add --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing gnu-libiconv
-
+ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so
 RUN set -x &&  \
     echo "unicode=\"YES\"" >> /etc/rc.conf && \
     mkdir $COMPOSER_HOME && \
     apk update && \
     apk add --no-cache \
-    shadow \
     php7 \
     php7-openssl \
     php7-phar \
     php7-json \
-    php7-zip \
     php7-iconv \
     php7-fileinfo \
     php7-dom \
@@ -45,14 +55,7 @@ RUN set -x &&  \
     php7-pdo \
     php7-ctype \
     php7-simplexml \
-    php7-xdebug \
     php7-xmlwriter
-
-# Enable XDEBUG
-RUN sed -i "s/;zend_extension=/zend_extension=/g" /etc/php7/conf.d/xdebug.ini
-
-# Change jenkins uid/gid to the master image
-RUN usermod --uid 1000 jenkins && groupmod --gid 1000 jenkins
 
 WORKDIR $COMPOSER_HOME
 
@@ -75,5 +78,5 @@ USER jenkins
 COPY composer.json $COMPOSER_HOME
 COPY auth.json $COMPOSER_HOME
 RUN composer update
-RUN chown -R jenkins: $COMPOSER_HOME/cache
+#RUN chown -R jenkins: $COMPOSER_HOME
 WORKDIR $AGENT_WORKDIR
