@@ -11,7 +11,10 @@ ENV JENKINS_SLAVE_AGENT_PORT 50000
 USER root
 
 RUN apk update && \
-    apk add --no-cache docker
+    apk add --no-cache docker && \
+    curl -LO https://deployer.org/deployer.phar && \
+    mv deployer.phar /usr/local/bin/dep && \
+    chmod +x /usr/local/bin/dep
 
 USER jenkins 
 
