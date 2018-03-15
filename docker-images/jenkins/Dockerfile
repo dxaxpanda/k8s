@@ -17,6 +17,7 @@ RUN apk update && \
     php7 \
     php7-phar \
     php7-json \
+    php7-gd \
     php7-mbstring && \
     curl -LO https://deployer.org/deployer.phar && \
     mv deployer.phar /usr/local/bin/dep && \
