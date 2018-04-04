@@ -29,6 +29,7 @@ RUN set -x &&  \
     php7-openssl \
     php7-phar \
     php7-json \
+    php7-gd \
     php7-zip \
     php7-iconv \
     php7-fileinfo \
